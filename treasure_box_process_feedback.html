@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Treasure Box Process Feedback</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; color: #1e293b; }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 18% 12%, #fff7ad 0 54px, transparent 56px),
+        linear-gradient(180deg, #7dd3fc 0%, #bae6fd 40%, #0ea5e9 41%, #38bdf8 52%, #fde68a 53%, #fcd34d 100%);
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 8px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 8px;
+      min-height: 100vh;
+    }
+
+    .hero, .card {
+      background: rgba(255,255,255,0.92);
+      border: 2px solid rgba(255,255,255,0.75);
+      border-radius: 22px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+    }
+
+    .hero { text-align: center; padding: 10px; }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #dcfce7;
+      border: 2px solid #22c55e;
+      color: #14532d;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    h1 { margin: 5px 0 2px; font-size: 34px; line-height: 1; color: #7c2d12; text-shadow: 2px 2px 0 #fde68a; }
+    h2 { margin: 0; font-size: 18px; color: #7c2d12; }
+    p { margin: 0; }
+    .story { max-width: 940px; margin: 5px auto 0; font-size: 13px; line-height: 1.25; }
+    #timer { font-size: 20px; margin-top: 4px; font-weight: bold; color: #7c2d12; }
+
+    .main { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 8px; min-height: 0; }
+    .card { padding: 10px; }
+
+    .island-scene {
+      position: relative;
+      height: 300px;
+      border-radius: 20px;
+      background:
+        radial-gradient(ellipse at 50% 76%, #fde68a 0 46%, transparent 47%),
+        linear-gradient(180deg, #93c5fd 0%, #bfdbfe 38%, #0ea5e9 39%, #38bdf8 56%, #fde68a 57%);
+      overflow: hidden;
+      border: 3px solid rgba(255,255,255,0.8);
+      margin-top: 8px;
+    }
+
+    .cloud { position: absolute; background: white; border-radius: 999px; opacity: 0.92; }
+    .cloud:before, .cloud:after { content: ""; position: absolute; background: white; border-radius: 999px; }
+    .cloud.one { width: 76px; height: 24px; top: 18px; left: 42px; }
+    .cloud.one:before { width: 36px; height: 36px; left: 12px; top: -14px; }
+    .cloud.one:after { width: 44px; height: 44px; right: 8px; top: -20px; }
+    .cloud.two { width: 88px; height: 26px; top: 42px; right: 34px; }
+    .cloud.two:before { width: 40px; height: 40px; left: 14px; top: -18px; }
+    .cloud.two:after { width: 48px; height: 48px; right: 10px; top: -22px; }
+
+    .palm {
+      position: absolute; bottom: 45px; left: 46px; width: 16px; height: 105px;
+      background: linear-gradient(90deg, #7c2d12, #b45309); border-radius: 18px;
+      transform: rotate(-7deg); transform-origin: bottom;
+    }
+    .leaf {
+      position: absolute; width: 74px; height: 22px; background: #15803d;
+      border-radius: 100% 0 100% 0; top: -12px; left: -30px; transform-origin: right center;
+    }
+    .leaf.l1 { transform: rotate(-35deg); }
+    .leaf.l2 { transform: rotate(10deg); }
+    .leaf.l3 { transform: rotate(55deg); }
+    .leaf.l4 { transform: rotate(105deg); }
+    .leaf.l5 { transform: rotate(155deg); }
+
+    .treasure-area { position: absolute; left: 50%; bottom: 38px; transform: translateX(-50%); width: 250px; text-align: center; }
+    .treasure-box { position: relative; width: 230px; height: 135px; margin: 0 auto; transform: scale(0.88); transform-origin: bottom center; perspective: 800px; }
+    .lid {
+      position: absolute; left: 0; top: 0; width: 230px; height: 62px;
+      background: linear-gradient(180deg, #b45309, #78350f); border: 4px solid #451a03;
+      border-radius: 120px 120px 14px 14px; z-index: 2; transition: transform 0.5s ease, top 0.5s ease; transform-origin: bottom center;
+    }
+    .box-body {
+      position: absolute; left: 0; bottom: 0; width: 230px; height: 90px;
+      background: linear-gradient(180deg, #b45309, #78350f); border: 4px solid #451a03;
+      border-radius: 18px; z-index: 3;
+    }
+    .box-body:before, .lid:before {
+      content: ""; position: absolute; left: 103px; top: -5px; width: 24px; height: calc(100% + 10px);
+      background: #facc15; border-left: 3px solid #a16207; border-right: 3px solid #a16207;
+    }
+    .lock {
+      position: absolute; left: 82px; top: 42px; width: 66px; height: 50px; background: #facc15;
+      border: 4px solid #854d0e; border-radius: 12px; z-index: 5; display: flex; justify-content: center; align-items: center;
+      font-size: 26px;
+    }
+    .gold-glow {
+      position: absolute; left: 42px; top: 46px; width: 145px; height: 48px;
+      background: radial-gradient(circle, rgba(250,204,21,.95), rgba(250,204,21,.05) 70%);
+      filter: blur(8px); opacity: 0; transition: opacity 0.4s ease; z-index: 1;
+    }
+    .treasure-box.open .lid { top: -35px; transform: rotateX(-55deg); }
+    .treasure-box.open .gold-glow { opacity: 1; }
+
+    .code-panel {
+      margin: 0 auto; width: 205px; padding: 8px 12px; border-radius: 16px;
+      background: #fef3c7; border: 3px dashed #d97706; font-size: 34px; font-weight: bold;
+      letter-spacing: 0.25em; padding-left: calc(12px + 0.25em); color: #7c2d12;
+    }
+
+    .input-card { margin-top: 8px; background: #fff7ed; border: 3px solid #fdba74; border-radius: 18px; padding: 10px; }
+    label { display: block; font-weight: bold; color: #7c2d12; font-size: 14px; margin-bottom: 6px; }
+    .input-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    input {
+      width: 100%; border: 3px solid #f59e0b; border-radius: 14px; padding: 8px 10px;
+      font-size: 26px; font-weight: bold; letter-spacing: 0.28em; text-align: center;
+      outline: none; background: #fffbeb; color: #7c2d12; -webkit-appearance: none; appearance: none;
+    }
+
+    button {
+      border: none; border-radius: 14px; padding: 10px 13px; font-weight: bold; font-size: 14px;
+      cursor: pointer; touch-action: manipulation; -webkit-user-select: none; user-select: none;
+    }
+    button.primary { background: #16a34a; color: white; box-shadow: 0 4px 0 #166534; }
+    button.primary.inactive { opacity: 0.45; box-shadow: none; }
+    button.secondary { background: #0ea5e9; color: white; box-shadow: 0 4px 0 #0369a1; }
+    button.reset { background: #f97316; color: white; box-shadow: 0 4px 0 #c2410c; }
+
+    .feedback-message {
+      margin-top: 8px; border-radius: 16px; padding: 10px; font-size: 16px; font-weight: bold;
+      text-align: left; min-height: 66px; border: 3px solid transparent;
+      line-height: 1.35;
+    }
+    .feedback-message.empty { background: #f8fafc; color: #64748b; border-color: #e2e8f0; text-align: center; }
+    .feedback-message.wrong { background: #ecfeff; color: #155e75; border-color: #67e8f9; }
+    .feedback-message.correct { background: #dcfce7; color: #166534; border-color: #86efac; text-align: center; }
+
+    .footer-actions { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .strategy-card {
+      background: #f0fdf4;
+      border: 2px solid #86efac;
+      border-radius: 18px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .strategy-card h2 { color: #14532d; }
+    .strategy-card ol { margin: 8px 0 0; padding-left: 20px; font-size: 13px; line-height: 1.35; color: #14532d; }
+
+    aside.card { display: grid; grid-template-rows: auto auto 1fr; overflow: hidden; }
+    aside.card p { font-size: 12px; margin-top: 4px; color: #64748b; }
+    .attempt-log { margin-top: 8px; display: grid; gap: 6px; overflow: auto; align-content: start; -webkit-overflow-scrolling: touch; }
+    .attempt { background: #fff7ed; border: 2px solid #fed7aa; border-radius: 14px; padding: 8px 10px; font-size: 12px; }
+    .attempt strong { color: #7c2d12; }
+    .attempt .status { margin-top: 2px; font-weight: bold; font-size: 12px; color: #155e75; }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(15,23,42,.58); display: none;
+      align-items: center; justify-content: center; z-index: 9999; padding: 18px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-card {
+      width: min(760px, 96vw); background: #fff7ed; border: 4px solid #fdba74; border-radius: 30px;
+      padding: 24px; box-shadow: 0 30px 80px rgba(15,23,42,.35); position: relative; text-align: center;
+    }
+    .modal-card h2 { font-size: 28px; color: #7c2d12; margin: 0; }
+    .modal-reason { margin-top: 10px; color: #7c2d12; font-weight: bold; font-size: 16px; }
+    .modal-close {
+      position: absolute; top: 10px; right: 12px; width: 38px; height: 38px;
+      border-radius: 999px; background: #f97316; color: white; box-shadow: 0 3px 0 #c2410c;
+      font-size: 24px; line-height: 1; padding: 0;
+    }
+    .timer-modal-icon { font-size: 42px; margin-bottom: 8px; }
+    .reflection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
+    .reflection-box {
+      background: #ecfeff; border: 2px solid #67e8f9; border-radius: 14px; padding: 10px;
+      font-weight: bold; color: #155e75; font-size: 13px; line-height: 1.25;
+    }
+
+    @media (max-width: 900px) {
+      .wrap { padding: 6px; gap: 6px; }
+      .hero { padding: 8px; }
+      h1 { font-size: 26px; }
+      .story { font-size: 11px; line-height: 1.2; }
+      #timer { font-size: 18px; }
+      .main { grid-template-columns: 1fr; grid-template-rows: auto auto; gap: 6px; }
+      .card { padding: 8px; border-radius: 18px; }
+      .island-scene { height: 225px; min-height: 190px; max-height: 230px; }
+      .treasure-area { bottom: 22px; }
+      .treasure-box { transform: scale(0.72); }
+      .code-panel { width: 170px; font-size: 28px; padding: 6px 10px; }
+      .palm { height: 78px; bottom: 32px; left: 30px; }
+      .leaf { width: 56px; height: 18px; }
+      h2 { font-size: 15px; }
+      label { font-size: 12px; }
+      input { font-size: 22px; padding: 6px 8px; }
+      button { font-size: 12px; padding: 8px 10px; }
+      .feedback-message { font-size: 13px; padding: 7px; min-height: 54px; }
+      aside.card { max-height: 190px; }
+      aside.card h2, aside.card p { display: none; }
+      .attempt-log { margin-top: 0; grid-template-columns: repeat(1, minmax(0, 1fr)); }
+      .attempt { padding: 5px 7px; font-size: 11px; }
+      .strategy-card ol { font-size: 11px; }
+      .modal-card { padding: 16px; border-radius: 22px; }
+      .modal-card h2 { font-size: 22px; }
+      .modal-reason { font-size: 13px; }
+      .reflection-grid { grid-template-columns: 1fr; }
+      .reflection-box { font-size: 13px; padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="badge">🏝️ Island Challenge · Process Feedback</div>
+      <h1>The Treasure Box Code</h1>
+      <div id="timer">⏳ 2:00</div>
+      <p class="story">
+        You have found an old treasure box buried on a mysterious island.
+        The island will not only judge your answer. It will guide your <strong>strategy</strong>:
+        how to test, compare, and improve your next guess.
+      </p>
+    </header>
+
+    <main class="main">
+      <section class="card">
+        <h2>🏴‍☠️ Try to unlock the treasure</h2>
+        <div class="island-scene">
+          <div class="cloud one"></div>
+          <div class="cloud two"></div>
+          <div class="palm">
+            <div class="leaf l1"></div><div class="leaf l2"></div><div class="leaf l3"></div><div class="leaf l4"></div><div class="leaf l5"></div>
+          </div>
+          <div class="treasure-area">
+            <div id="treasureBox" class="treasure-box">
+              <div class="gold-glow"></div><div class="lid"></div><div class="box-body"></div><div class="lock">🔒</div>
+            </div>
+            <div id="codeDisplay" class="code-panel">???</div>
+          </div>
+        </div>
+
+        <div class="input-card">
+          <label for="guessInput">Enter the 3-digit treasure code</label>
+          <div class="input-row">
+            <input id="guessInput" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="123" autocomplete="off" oninput="updateInput()" onchange="updateInput()" onkeyup="handleKey(event)">
+            <button id="tryBtn" class="primary inactive" type="button" onclick="submitGuess()">Try Code</button>
+          </div>
+          <div id="feedbackMessage" class="feedback-message empty">Make your first guess.</div>
+        </div>
+
+        <div class="footer-actions">
+          <button id="revealBtn" class="secondary" type="button" onclick="revealCode()">Reveal code</button>
+          <button id="resetBtn" class="reset" type="button" onclick="resetQuest()">Reset quest</button>
+        </div>
+      </section>
+
+      <aside class="card">
+        <div class="strategy-card">
+          <h2>🧭 Strategy Map</h2>
+          <ol>
+            <li>Do not change everything at once.</li>
+            <li>Keep useful information from earlier guesses.</li>
+            <li>Test one position or one digit at a time.</li>
+            <li>Compare your new guess with your previous guess.</li>
+          </ol>
+        </div>
+
+        <h2>🗺️ Attempt Log</h2>
+        <p>The log records each guess and the process feedback received.</p>
+        <div id="attemptLog" class="attempt-log"><p style="color:#64748b;">No attempts yet.</p></div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="reflectionModal" class="modal-overlay" onclick="modalBackgroundClick(event)">
+    <div class="modal-card">
+      <button id="closeModalBtn" class="modal-close" type="button" onclick="closeReflectionModal()">×</button>
+      <h2>💭 Reflection after the quest</h2>
+      <p id="modalReason" class="modal-reason"></p>
+      <div class="reflection-grid">
+        <div class="reflection-box">Did the feedback help you improve your method?</div>
+        <div class="reflection-box">What strategy did you use after receiving feedback?</div>
+        <div class="reflection-box">How was this different from only hearing “Right” or “Wrong”?</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="timerStartModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="timer-modal-icon">⏳</div>
+      <h2>The clock is starting!</h2>
+      <p class="modal-reason">You have 2 minutes to unlock the treasure box.</p>
+    </div>
+  </div>
+
+  <script>
+    var SECRET = "472";
+    var guess = "";
+    var attempts = [];
+    var showSecret = false;
+    var timeLeft = 120;
+    var timerStarted = false;
+    var timerInterval = null;
+    var timeExpired = false;
+    var solved = false;
+    var audioContext = null;
+
+    function el(id) { return document.getElementById(id); }
+
+    function playStartSound() {
+      try {
+        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!audioContext) audioContext = new AudioCtx();
+        if (audioContext.state === "suspended") audioContext.resume();
+
+        var now = audioContext.currentTime;
+        var osc = audioContext.createOscillator();
+        var gain = audioContext.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(660, now);
+        osc.frequency.setValueAtTime(880, now + 0.12);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(0.22, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start(now);
+        osc.stop(now + 0.36);
+      } catch (e) {}
+    }
+
+    function updateTimerDisplay() {
+      var minutes = Math.floor(timeLeft / 60);
+      var seconds = timeLeft % 60;
+      el("timer").innerHTML = "⏳ " + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+    }
+
+    function updateInput() {
+      var input = el("guessInput");
+      guess = (input.value || "").replace(/[^0-9]/g, "").slice(0, 3);
+      input.value = guess;
+      var active = !timeExpired && !solved && guess.length === 3;
+      el("tryBtn").className = active ? "primary" : "primary inactive";
+    }
+
+    function handleKey(event) {
+      updateInput();
+      if (event && event.key === "Enter") submitGuess();
+    }
+
+    function showTimerStartModal() {
+      el("timerStartModal").className = "modal-overlay show";
+      setTimeout(function () {
+        el("timerStartModal").className = "modal-overlay";
+      }, 1400);
+    }
+
+    function startTimer() {
+      if (timerStarted || timeExpired || solved) return;
+      timerStarted = true;
+      showTimerStartModal();
+      playStartSound();
+
+      timerInterval = setInterval(function () {
+        timeLeft = timeLeft - 1;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          timeExpired = true;
+          updateInput();
+          el("feedbackMessage").className = "feedback-message wrong";
+          el("feedbackMessage").innerHTML = "Time is up! The treasure remains locked.";
+          showReflectionModal("Time is up. Think about whether the feedback helped you improve your guessing process.");
+        }
+      }, 1000);
+    }
+
+    function scoreGuess(g) {
+      var score = 0;
+      for (var i = 0; i < 3; i++) {
+        if (g.charAt(i) === SECRET.charAt(i)) score += 2;
+        else if (SECRET.indexOf(g.charAt(i)) !== -1) score += 1;
+      }
+      return score;
+    }
+
+    function countChangedPositions(a, b) {
+      if (!a || !b) return 0;
+      var count = 0;
+      for (var i = 0; i < 3; i++) {
+        if (a.charAt(i) !== b.charAt(i)) count += 1;
+      }
+      return count;
+    }
+
+    function repeatedGuess(g) {
+      for (var i = 0; i < attempts.length; i++) {
+        if (attempts[i].guess === g) return true;
+      }
+      return false;
+    }
+
+    function makeProcessFeedback(g) {
+      if (attempts.length === 0) {
+        return "Start with a plan: keep this first guess as a reference point. For your next guess, change only one digit or one position so you can learn what caused the result to change.";
+      }
+
+      var previous = attempts[attempts.length - 1];
+      var previousGuess = previous.guess;
+      var previousScore = previous.score;
+      var currentScore = scoreGuess(g);
+      var changed = countChangedPositions(previousGuess, g);
+
+      if (repeatedGuess(g)) {
+        return "You already tested this exact code. A stronger process is to use the previous result to create a new comparison. Change one part of the code and test again.";
+      }
+
+      if (changed === 3) {
+        return "You changed all three digits at once. That makes it hard to know which change helped. Try keeping two digits the same and changing only one digit next.";
+      }
+
+      if (changed === 2) {
+        if (currentScore > previousScore) {
+          return "This guess improved, but you changed two positions. To learn more clearly, keep the stronger parts and change only one position next.";
+        }
+        return "You changed two positions and the result did not clearly improve. Try a more controlled strategy: change one position at a time.";
+      }
+
+      if (changed === 1) {
+        if (currentScore > previousScore) {
+          return "Good controlled test. You changed one part and the guess improved. Keep that useful change and now test another position.";
+        }
+        if (currentScore < previousScore) {
+          return "This was a useful test. Changing that one part made the result worse, so return to the earlier version and test a different position.";
+        }
+        return "You changed one part and the result stayed similar. That tells you the change did not give enough progress. Try testing a different position while keeping the rest stable.";
+      }
+
+      return "Compare this guess with your earlier guesses. Choose one thing to test next instead of guessing randomly.";
+    }
+
+    function submitGuess() {
+      updateInput();
+      if (guess.length !== 3 || timeExpired || solved) return false;
+
+      startTimer();
+
+      var right = guess === SECRET;
+      var feedback = right ? "Your strategy led to the right code!" : makeProcessFeedback(guess);
+      var score = scoreGuess(guess);
+
+      attempts.push({ guess: guess, feedback: feedback, right: right, score: score });
+
+      el("feedbackMessage").className = "feedback-message " + (right ? "correct" : "wrong");
+      el("feedbackMessage").innerHTML = right ? "Right! Your strategy unlocked the treasure box!" : feedback;
+
+      if (right) {
+        solved = true;
+        el("treasureBox").className = "treasure-box open";
+        el("codeDisplay").innerHTML = SECRET;
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      el("guessInput").value = "";
+      guess = "";
+      updateInput();
+      renderAttempts();
+      return false;
+    }
+
+    function renderAttempts() {
+      if (attempts.length === 0) {
+        el("attemptLog").innerHTML = '<p style="color:#64748b;">No attempts yet.</p>';
+        return;
+      }
+      var html = "";
+      for (var i = 0; i < attempts.length; i++) {
+        var a = attempts[i];
+        html += '<div class="attempt">';
+        html += '<strong>Attempt ' + (i + 1) + ': ' + a.guess + '</strong>';
+        html += '<div class="status">' + (a.right ? "Right" : "Process feedback") + '</div>';
+        html += '<div style="margin-top:4px;">' + a.feedback + '</div>';
+        html += '</div>';
+      }
+      el("attemptLog").innerHTML = html;
+    }
+
+    function resetQuest() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+      guess = "";
+      attempts = [];
+      showSecret = false;
+      timeLeft = 120;
+      timerStarted = false;
+      timeExpired = false;
+      solved = false;
+      el("guessInput").value = "";
+      el("codeDisplay").innerHTML = "???";
+      el("revealBtn").innerHTML = "Reveal code";
+      el("treasureBox").className = "treasure-box";
+      el("feedbackMessage").className = "feedback-message empty";
+      el("feedbackMessage").innerHTML = "Make your first guess.";
+      closeReflectionModal();
+      el("timerStartModal").className = "modal-overlay";
+      updateTimerDisplay();
+      updateInput();
+      renderAttempts();
+      return false;
+    }
+
+    function revealCode() {
+      showSecret = !showSecret;
+      el("codeDisplay").innerHTML = showSecret ? SECRET : "???";
+      el("revealBtn").innerHTML = showSecret ? "Hide code" : "Reveal code";
+      if (showSecret) {
+        showReflectionModal("You revealed the code. Pause and reflect on whether the feedback helped you improve your method, not only your answer.");
+      }
+      return false;
+    }
+
+    function showReflectionModal(reason) {
+      el("modalReason").innerHTML = reason;
+      el("reflectionModal").className = "modal-overlay show";
+    }
+
+    function closeReflectionModal() {
+      el("reflectionModal").className = "modal-overlay";
+      return false;
+    }
+
+    function modalBackgroundClick(event) {
+      if (event.target && event.target.id === "reflectionModal") {
+        closeReflectionModal();
+      }
+    }
+
+    updateTimerDisplay();
+    updateInput();
+    renderAttempts();
+  </script>
+</body>
+</html>
